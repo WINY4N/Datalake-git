@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Data Lake Connector | DevOps Console</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --primary-color: #0078d4;
+            --danger-color: #d13438;
+            --success-color: #107c10;
+            --text-color: #323130;
+            --border-color: #e1dfdd;
+            --terminal-bg: #1e1e1e;
+            --terminal-text: #cccccc;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 24px; font-weight: 600; color: var(--text-color); }
+        .subtitle { font-size: 14px; color: #605e5c; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        .card-header {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #605e5c;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        label { display: block; font-size: 12px; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #006cbe; }
+
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #a80000; }
+        
+        .btn-secondary { background-color: #605e5c; color: white; }
+        .btn-secondary:hover { background-color: #484644; }
+
+        .console-output {
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 150px;
+            overflow-x: auto;
+            border-left: 5px solid #333;
+        }
+
+        .status-success { border-left-color: var(--success-color); color: #dff6dd; }
+        .status-error { border-left-color: var(--danger-color); color: #fde7e9; }
+        .status-info { border-left-color: var(--primary-color); }
+
+        pre { margin: 0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>Data Lake Operations Console</h1>
+            <span class="subtitle">Azure Blob Storage Management Interface</span>
+        </div>
+        <div style="font-size: 12px; color: green;">● System Online</div>
+    </div>
+
+    {% if msg %}
+        <div class="card" style="margin-bottom: 20px; padding: 0; border: none;">
+            <div class="console-output status-{{ status }}">
+                <div>> System Response:</div>
+                <br>
+                {% if is_text %}
+                    <pre>{{ msg }}</pre>
+                {% else %}
+                    {{ msg }}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="dashboard-grid">
+        
+        <div class="card">
+            <div class="card-header">Data Ingestion</div>
+            
+            <form action="/push" method="POST" style="margin-bottom: 20px;">
+                <label>Push JSON/Text Object</label>
+                <input type="text" name="filename" placeholder="Target Filename (e.g., config.json)" required>
+                <input type="text" name="content" placeholder="Content string" required>
+                <button type="submit" class="btn-primary">Execute Push</button>
+            </form>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <label>Upload Binary/File</label>
+                <input type="file" name="file" required>
+                <button type="submit" class="btn-primary">Upload Stream</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Data Retrieval</div>
+            
+            <form action="/pull" method="POST" style="margin-bottom: 20px;">
+                <label>Inspect File Content</label>
+                <input type="text" name="filename" placeholder="Filename to inspect" required>
+                <button type="submit" class="btn-secondary">Read Stream</button>
+            </form>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+            <form action="/download" method="POST">
+                <label>Download Blob</label>
+                <input type="text" name="filename" placeholder="Filename to download" required>
+                <button type="submit" class="btn-secondary">Download File</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Management</div>
+            
+            <form action="/delete" method="POST">
+                <label style="color: var(--danger-color);">Delete Blob</label>
+                <input type="text" name="filename" placeholder="Filename to delete" required>
+                <p style="font-size: 11px; color: #666; margin-top: -5px; margin-bottom: 10px;">
+                    Warning: This action is irreversible. Ensure you have the correct filename.
+                </p>
+                <button type="submit" class="btn-danger" onclick="return confirm('Confirm Deletion: Are you sure you want to delete this object permanently?');">Delete Object</button>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>
